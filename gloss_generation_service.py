@@ -9,27 +9,31 @@ import re
 from typing import List, Optional
 from difflib import SequenceMatcher
 
-# Available ISL animations from Unity project (50+ glosses)
+# Available ISL animations from Unity project (52 glosses + extra words)
 AVAILABLE_GLOSSES = {
     "action", "agree", "almost", "ancient", "art", "available", "before", "body",
     "burden", "car", "careful", "clever", "come", "deafness", "die", "dizzy",
     "drive", "during", "education", "example", "experience", "expert", "explain",
-    "finish", "follow", "game", "go", "government", "he", "home", "hospital",
+    "finish", "follow", "game", "go", "government", "he", "hello", "home", "hospital",
     "idle", "independent", "interview", "january", "like", "monday", "must",
     "nature", "never", "operate", "other", "perfect", "please", "politician",
-    "possible", "progress", "sunday", "tv", "where", "work"
+    "possible", "progress", "sunday", "tv", "where", "work",
+    # Extra word animations from ISL_WE folder
+    "bad", "best", "big", "call", "cold", "yes", "zero",
+    # Letter animations (available)
+    "C", "I", "L", "U"
 }
 
 # English word → ISL gloss mapping dictionary
 # Maps common English words to available ISL animations
 GLOSS_DICTIONARY = {
     # Greetings & Basics
-    "hello": "agree",
-    "hi": "agree",
-    "hey": "agree",
+    "hello": "hello",
+    "hi": "hello",
+    "hey": "hello",
     "bye": "follow",
     "goodbye": "follow",
-    "yes": "agree",
+    "yes": "yes",
     "ok": "agree",
     "okay": "agree",
     "no": "never",
@@ -133,9 +137,14 @@ GLOSS_DICTIONARY = {
     "tell": "explain",
     "ask": "explain",
     "explain": "explain",
-    "answer": "perfect",
+    "answer": "explain",
     "listen": "follow",
     "hear": "follow",
+    "help": "action",
+    "believe": "explain",
+    "look": "where",
+    "see": "where",
+    "watch": "where",
     
     # Verbs - Duration
     "start": "action",
@@ -170,7 +179,7 @@ GLOSS_DICTIONARY = {
     "car": "car",
     "vehicle": "car",
     "thing": "action",
-    "name": "he",
+    "name": "explain",
     "body": "body",
     "experience": "experience",
     "example": "example",
@@ -179,6 +188,17 @@ GLOSS_DICTIONARY = {
     "tv": "tv",
     "nature": "nature",
     "progress": "progress",
+    "family": "he",
+    "friend": "he",
+    "child": "he",
+    "baby": "he",
+    "mother": "he",
+    "father": "he",
+    "sister": "he",
+    "brother": "he",
+    "food": "action",
+    "water": "action",
+    "money": "action",
     
     # Nouns - Time
     "time": "during",
@@ -207,9 +227,22 @@ GLOSS_DICTIONARY = {
     "possible": "possible",
     "impossible": "never",
     "available": "available",
+    "easy": "perfect",
+    "difficult": "burden",
+    "hard": "burden",
+    "soft": "perfect",
+    "big": "action",
+    "small": "action",
+    "beautiful": "perfect",
+    "ugly": "burden",
+    "clean": "perfect",
+    "dirty": "burden",
+    "quick": "action",
+    "slow": "action",
+    "fast": "action",
     
     # Adjectives - States/Emotions
-    "alive": "action",
+    "alive": "perfect",
     "dead": "die",
     "ancient": "ancient",
     "old": "ancient",
@@ -254,32 +287,32 @@ POS_FALLBACK = {
 # Alphabet gloss mapping for letter-by-letter spelling fallback
 # When a word is not found in the dictionary, it falls back to spelling it out
 ALPHABET_GLOSS = {
-    "a": "a_sign",
-    "b": "b_sign",
-    "c": "c_sign",
-    "d": "d_sign",
-    "e": "e_sign",
-    "f": "f_sign",
-    "g": "g_sign",
-    "h": "h_sign",
-    "i": "i_sign",
-    "j": "j_sign",
-    "k": "k_sign",
-    "l": "l_sign",
-    "m": "m_sign",
-    "n": "n_sign",
-    "o": "o_sign",
-    "p": "p_sign",
-    "q": "q_sign",
-    "r": "r_sign",
-    "s": "s_sign",
-    "t": "t_sign",
-    "u": "u_sign",
-    "v": "v_sign",
-    "w": "w_sign",
-    "x": "x_sign",
-    "y": "y_sign",
-    "z": "z_sign",
+    "a": "A",
+    "b": "B",
+    "c": "C",
+    "d": "D",
+    "e": "E",
+    "f": "F",
+    "g": "G",
+    "h": "H",
+    "i": "I",
+    "j": "J",
+    "k": "K",
+    "l": "L",
+    "m": "M",
+    "n": "N",
+    "o": "O",
+    "p": "P",
+    "q": "Q",
+    "r": "R",
+    "s": "S",
+    "t": "T",
+    "u": "U",
+    "v": "V",
+    "w": "W",
+    "x": "X",
+    "y": "Y",
+    "z": "Z",
 }
 
 
