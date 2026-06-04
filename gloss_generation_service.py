@@ -251,6 +251,37 @@ POS_FALLBACK = {
     "PRON": "he",
 }
 
+# Alphabet gloss mapping for letter-by-letter spelling fallback
+# When a word is not found in the dictionary, it falls back to spelling it out
+ALPHABET_GLOSS = {
+    "a": "a_sign",
+    "b": "b_sign",
+    "c": "c_sign",
+    "d": "d_sign",
+    "e": "e_sign",
+    "f": "f_sign",
+    "g": "g_sign",
+    "h": "h_sign",
+    "i": "i_sign",
+    "j": "j_sign",
+    "k": "k_sign",
+    "l": "l_sign",
+    "m": "m_sign",
+    "n": "n_sign",
+    "o": "o_sign",
+    "p": "p_sign",
+    "q": "q_sign",
+    "r": "r_sign",
+    "s": "s_sign",
+    "t": "t_sign",
+    "u": "u_sign",
+    "v": "v_sign",
+    "w": "w_sign",
+    "x": "x_sign",
+    "y": "y_sign",
+    "z": "z_sign",
+}
+
 
 def _similarity_score(word1: str, word2: str) -> float:
     """Calculate similarity between two words (0-1 scale)."""
@@ -273,6 +304,34 @@ def _find_similar_gloss(word: str, threshold: float = 0.6) -> Optional[str]:
             best_match = gloss
 
     return best_match
+
+
+def _spell_word_with_alphabet(word: str) -> List[str]:
+    """
+    Spell out a word letter-by-letter using alphabet gloss.
+    
+    Used as fallback when a word is not found in the gloss dictionary.
+    Returns a list of alphabet glosses for each letter in the word.
+    
+    Args:
+        word: Word to spell out
+        
+    Returns:
+        List of alphabet glosses (e.g., ['a_sign', 'b_sign', 'c_sign'])
+        Empty list if word contains characters not in alphabet
+    """
+    alphabet_gloss = []
+    word_lower = word.lower().strip()
+    
+    for char in word_lower:
+        if char in ALPHABET_GLOSS:
+            alphabet_gloss.append(ALPHABET_GLOSS[char])
+        elif char.isalpha():
+            # Character exists but not in our alphabet mapping
+            # Skip it or handle gracefully
+            continue
+    
+    return alphabet_gloss
 
 
 def _tokenize_and_clean(text: str) -> List[str]:
@@ -332,24 +391,30 @@ def _get_gloss_for_word(word: str) -> Optional[str]:
     if similar_gloss:
         return similar_gloss
 
-    # 5. No match found
-    return None
+    # 5. No match found - will use alphabet fallback
+    return "ALPHABET_FALLBACK"
 
 
 def generate_glosses(text: str) -> List[str]:
     """
     Convert English text to a sequence of ISL glosses.
     
+    Strategy:
+    1. Try to find gloss in dictionary or through similarity matching
+    2. If word not found, spell it out letter-by-letter using alphabet gloss (fallback)
+    3. Skip stop words (articles, prepositions, etc.)
+    
     Args:
         text: English sentence/phrase
         
     Returns:
         List of ISL gloss words (animation names) that can be performed by the avatar.
+        For unmapped words, returns individual letter glosses (e.g., 'aditya' → ['a_sign', 'd_sign', 'i_sign', 't_sign', 'y_sign', 'a_sign'])
         Returns empty list if input is empty or invalid.
         
     Example:
         >>> generate_glosses("Hello my name is Aditya")
-        ['agree', 'he', 'he']  # "is" and "aditya" are skipped/unmapped
+        ['agree', 'he', 'he', 'a_sign', 'd_sign', 'i_sign', 't_sign', 'y_sign', 'a_sign']
     """
     if not text or not text.strip():
         return []
@@ -361,12 +426,20 @@ def generate_glosses(text: str) -> List[str]:
     for word in words:
         gloss = _get_gloss_for_word(word)
         
-        # Only add if we found a match (gloss is not None)
-        if gloss is not None and gloss in AVAILABLE_GLOSSES:
+        # Check for stop word (None means skip)
+        if gloss is None:
+            continue
+        
+        # Check if word is in dictionary or found through similarity matching
+        if gloss in AVAILABLE_GLOSSES:
             glosses.append(gloss)
-        else:
-            # Log unknown words for debugging
-            if gloss is None:
+        # Check if we need alphabet fallback
+        elif gloss == "ALPHABET_FALLBACK":
+            alphabet_gloss = _spell_word_with_alphabet(word)
+            if alphabet_gloss:
+                glosses.extend(alphabet_gloss)
+                print(f"Gloss generation: spelling out '{word}' using alphabet gloss")
+            else:
                 print(f"Gloss generation: no mapping found for '{word}'")
     
     return glosses
@@ -380,7 +453,8 @@ def generate_glosses_with_confidence(text: str) -> dict:
         {
             "glosses": ["hello", "my", "name", ...],
             "coverage": 0.85,  # Percentage of words successfully mapped
-            "unmapped_words": ["aditya", ...],  # Words that couldn't be mapped
+            "unmapped_words": ["words_that_had_no_alphabet_match", ...],  # Words that couldn't be mapped even with alphabet
+            "fallback_words": ["aditya", ...],  # Words that used alphabet gloss fallback
             "original_word_count": 5
         }
     """
@@ -389,52 +463,106 @@ def generate_glosses_with_confidence(text: str) -> dict:
             "glosses": [],
             "coverage": 0.0,
             "unmapped_words": [],
+            "fallback_words": [],
             "original_word_count": 0
         }
 
     words = _tokenize_and_clean(text)
     glosses = []
     unmapped_words = []
+    fallback_words = []
 
     for word in words:
         gloss = _get_gloss_for_word(word)
         
-        if gloss and gloss in AVAILABLE_GLOSSES:
+        # Skip stop words
+        if gloss is None:
+            continue
+        
+        # Word found in dictionary
+        if gloss in AVAILABLE_GLOSSES:
             glosses.append(gloss)
-        else:
-            unmapped_words.append(word)
+        # Use alphabet fallback
+        elif gloss == "ALPHABET_FALLBACK":
+            alphabet_gloss = _spell_word_with_alphabet(word)
+            if alphabet_gloss:
+                glosses.extend(alphabet_gloss)
+                fallback_words.append(word)
+            else:
+                # Couldn't generate alphabet gloss (no valid letters)
+                unmapped_words.append(word)
 
     word_count = len(words)
-    coverage = (word_count - len(unmapped_words)) / word_count if word_count > 0 else 0.0
+    # Coverage: words that were either dictionary-mapped or alphabet-fallback
+    mapped_count = word_count - len(unmapped_words)
+    coverage = mapped_count / word_count if word_count > 0 else 0.0
 
     return {
         "glosses": glosses,
         "coverage": round(coverage, 2),
         "unmapped_words": unmapped_words,
+        "fallback_words": fallback_words,
         "original_word_count": word_count
     }
 
 
 if __name__ == "__main__":
-    # Test examples
+    # Test examples - including complex sentences
     test_sentences = [
+        # Basic tests
         "Hello my name is Aditya",
         "I like to work and play games",
         "Where is the hospital",
         "Please come home before monday",
         "Do you understand what I am saying",
+        
+        # Complex sentences with unmapped words
+        "My favorite color is blue",
+        "I speak xyz language",
+        
+        # Complex real-world sentences
+        "Could you please help me understand this complex problem",
+        "The doctor explained the diagnosis to my family yesterday",
+        "I want to travel to Japan and visit Tokyo next summer",
+        "What is your preferred method of communication",
+        "Mathematics and science are fascinating subjects to explore",
+        "The weather was beautiful throughout the entire weekend",
+        "I cannot believe how quickly everything happened today",
+        "Can you recommend some good restaurants in the downtown area",
     ]
 
-    print("=" * 60)
-    print("ISL Gloss Generation Service - Test Examples")
-    print("=" * 60)
+    print("=" * 70)
+    print("ISL Gloss Generation Service - Comprehensive Test Suite")
+    print("=" * 70)
+
+    total_words = 0
+    total_glosses = 0
+    total_fallback = 0
 
     for sentence in test_sentences:
         glosses = generate_glosses(sentence)
         confidence = generate_glosses_with_confidence(sentence)
         
-        print(f"\nInput:  '{sentence}'")
+        print(f"\n{'─' * 70}")
+        print(f"Input:  '{sentence}'")
         print(f"Glosses: {glosses}")
+        print(f"Total Glosses Generated: {len(glosses)}")
         print(f"Coverage: {confidence['coverage']*100:.0f}%")
+        
+        if confidence['fallback_words']:
+            print(f"Alphabet Fallback Used For: {confidence['fallback_words']} ({len(confidence['fallback_words'])} words)")
         if confidence['unmapped_words']:
             print(f"Unmapped: {confidence['unmapped_words']}")
+        
+        total_words += confidence['original_word_count']
+        total_glosses += len(glosses)
+        total_fallback += len(confidence['fallback_words'])
+
+    print(f"\n{'═' * 70}")
+    print("SUMMARY STATISTICS")
+    print(f"{'═' * 70}")
+    print(f"Total Test Sentences: {len(test_sentences)}")
+    print(f"Total Words Processed: {total_words}")
+    print(f"Total Glosses Generated: {total_glosses}")
+    print(f"Words Using Alphabet Fallback: {total_fallback}")
+    print(f"Overall Gloss Generation: {total_glosses}/{total_words} = {(total_glosses/total_words)*100:.1f}%")
