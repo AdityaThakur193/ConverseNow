@@ -12,6 +12,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from stt_service import transcribe_wav
 from translation_service import translate_text
+from gloss_generation_service import generate_glosses
 
 app = FastAPI()
 
@@ -195,15 +196,35 @@ async def audio_endpoint(websocket: WebSocket):
 
                 last_final_transcript = transcript
 
+                # Translate to target language
                 translated = translate_text(
                     transcript,
                     src_lang=src_lang,
                     tgt_lang=tgt_lang
                 ) or transcript
 
+                # Also translate to English for gloss generation
+                english_for_glosses = translate_text(
+                    transcript,
+                    src_lang=src_lang,
+                    tgt_lang="en-IN"
+                ) or ""
+
+                # Generate ISL glosses from English translation
+                glosses = []
+                try:
+                    if english_for_glosses:
+                        glosses = generate_glosses(english_for_glosses)
+                        print(f"Generated glosses: {glosses}")
+                except Exception as e:
+                    print(f"Error generating glosses: {e}")
+                    glosses = []
+
                 response = {
                     "original": transcript,
                     "translated": translated,
+                    "english": english_for_glosses,  # English version for reference
+                    "glosses": glosses,
                     "src_lang": src_lang,
                     "tgt_lang": tgt_lang,
                     "timestamp": time.time(),
@@ -211,7 +232,7 @@ async def audio_endpoint(websocket: WebSocket):
                 }
 
                 await websocket.send_json(response)
-                print("Sent final transcript + translation")
+                print("Sent final transcript + translation + glosses")
 
     except WebSocketDisconnect:
         print("Client disconnected")
