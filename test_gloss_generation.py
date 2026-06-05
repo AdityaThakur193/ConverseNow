@@ -84,11 +84,11 @@ def test_gloss_generation():
     test_cases = [
         # Input → Expected glosses
         # Articles, prepositions, and proper names are correctly skipped/unmapped (or spelled out)
-        ("Hello my name is Aditya", ["hello", "he", "explain", "A", "D", "I", "T", "Y", "A"]),  # "is" skipped, "aditya" spelled out
-        ("I like to work", ["he", "like", "work"]),  # "to" is skipped (preposition)
+        ("Hello my name is Aditya", ["hello", "M", "Y", "N", "A", "M", "E", "A", "D", "I", "T", "Y", "A"]),  # "is" skipped, others spelled out
+        ("I like to work", ["I", "like", "work"]),  # "to" is skipped (preposition)
         ("Where is the home", ["where", "home"]),  # "is" and "the" skipped
         ("Come before finish", ["come", "before", "finish"]),
-        ("Please do this carefully", ["please", "action", "car"]),  # "this" has no good match, "carefully" → "car" via substring
+        ("Please do this carefully", ["please", "D", "O", "car"]),  # "this" has no good match, "do" spelled out, "carefully" -> "car" via substring
         ("", []),
     ]
     

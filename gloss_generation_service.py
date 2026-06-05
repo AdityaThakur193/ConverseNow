@@ -27,33 +27,7 @@ AVAILABLE_GLOSSES = {
 # English word → ISL gloss mapping dictionary
 # Maps common English words to available ISL animations
 GLOSS_DICTIONARY = {
-    # Greetings & Basics
-    "hello": "hello",
-    "hi": "hello",
-    "hey": "hello",
-    "bye": "follow",
-    "goodbye": "follow",
-    "yes": "yes",
-    "ok": "agree",
-    "okay": "agree",
-    "no": "never",
-    "not": "never",
-    
-    # Pronouns
-    "i": "he",
-    "me": "he",
-    "my": "he",
-    "you": "he",
-    "your": "he",
-    "he": "he",
-    "she": "he",
-    "it": "he",
-    "we": "he",
-    "our": "he",
-    "they": "he",
-    "their": "he",
-    
-    # Articles & Common Words to Skip (mapped to None internally)
+    # Stop Words / Grammatical items to skip
     "a": None,
     "an": None,
     "the": None,
@@ -75,7 +49,6 @@ GLOSS_DICTIONARY = {
     "about": None,
     "into": None,
     "through": None,
-    "during": "during",  # "during" is a valid gloss
     "and": None,
     "or": None,
     "but": None,
@@ -93,186 +66,74 @@ GLOSS_DICTIONARY = {
     "who": None,
     "whom": None,
     "whose": None,
-    "s": None,  # From contractions like "what's"
-    "t": None,  # From contractions
-    "d": None,  # From contractions
-    "m": None,  # From contractions
-    "ve": None,  # From contractions
-    "ll": None,  # From contractions
-    "re": None,  # From contractions
-    
-    # Verbs - Movement & Action
-    "go": "go",
-    "come": "come",
-    "walk": "go",
-    "run": "go",
-    "move": "go",
-    "leave": "go",
-    "arrive": "come",
-    "approach": "come",
-    "follow": "follow",
-    "travel": "go",
-    "drive": "drive",
-    
-    # Verbs - States & Actions
-    "work": "work",
-    "do": "action",
-    "make": "action",
-    "create": "action",
-    "act": "action",
-    "play": "game",
-    "game": "game",
-    "like": "like",
-    "love": "like",
-    "enjoy": "like",
+    "s": None,
+    "t": None,
+    "d": None,
+    "m": None,
+    "ve": None,
+    "ll": None,
+    "re": None,
+
+    # Exact mappings for available ISL animations to themselves
+    "action": "action",
     "agree": "agree",
-    "disagree": "never",
-    "understand": "perfect",
-    "know": "perfect",
-    
-    # Verbs - Communication
-    "say": "explain",
-    "speak": "explain",
-    "talk": "explain",
-    "tell": "explain",
-    "ask": "explain",
-    "explain": "explain",
-    "answer": "explain",
-    "listen": "follow",
-    "hear": "follow",
-    "help": "action",
-    "believe": "explain",
-    "look": "where",
-    "see": "where",
-    "watch": "where",
-    
-    # Verbs - Duration
-    "start": "action",
-    "begin": "action",
-    "finish": "finish",
-    "end": "finish",
-    "complete": "finish",
-    "before": "before",
-    "after": "finish",
-    
-    # Nouns - Places
-    "home": "home",
-    "house": "home",
-    "hospital": "hospital",
-    "school": "education",
-    "office": "work",
-    "government": "government",
-    "place": "home",
-    "location": "home",
-    
-    # Nouns - People & Roles
-    "man": "he",
-    "woman": "he",
-    "person": "he",
-    "people": "he",
-    "politician": "politician",
-    "expert": "expert",
-    "teacher": "expert",
-    "doctor": "expert",
-    
-    # Nouns - Things & Concepts
-    "car": "car",
-    "vehicle": "car",
-    "thing": "action",
-    "name": "explain",
-    "body": "body",
-    "experience": "experience",
-    "example": "example",
-    "education": "education",
-    "art": "art",
-    "tv": "tv",
-    "nature": "nature",
-    "progress": "progress",
-    "family": "he",
-    "friend": "he",
-    "child": "he",
-    "baby": "he",
-    "mother": "he",
-    "father": "he",
-    "sister": "he",
-    "brother": "he",
-    "food": "action",
-    "water": "action",
-    "money": "action",
-    
-    # Nouns - Time
-    "time": "during",
-    "day": "during",
-    "monday": "monday",
-    "january": "january",
-    "sunday": "sunday",
-    "week": "during",
-    "month": "january",
-    "year": "january",
-    
-    # Adjectives & Qualities
-    "good": "perfect",
-    "great": "perfect",
-    "perfect": "perfect",
-    "bad": "burden",
-    "terrible": "burden",
-    "careful": "careful",
-    "smart": "clever",
-    "clever": "clever",
-    "independent": "independent",
-    "dizzy": "dizzy",
-    "sick": "dizzy",
-    "tired": "idle",
-    "lazy": "idle",
-    "possible": "possible",
-    "impossible": "never",
-    "available": "available",
-    "easy": "perfect",
-    "difficult": "burden",
-    "hard": "burden",
-    "soft": "perfect",
-    "big": "action",
-    "small": "action",
-    "beautiful": "perfect",
-    "ugly": "burden",
-    "clean": "perfect",
-    "dirty": "burden",
-    "quick": "action",
-    "slow": "action",
-    "fast": "action",
-    
-    # Adjectives - States/Emotions
-    "alive": "perfect",
-    "dead": "die",
-    "ancient": "ancient",
-    "old": "ancient",
-    "new": "available",
-    "happy": "like",
-    "sad": "burden",
-    "angry": "burden",
-    
-    # Adverbs & Modifiers
     "almost": "almost",
-    "never": "never",
-    "always": "action",
-    "please": "please",
-    "must": "must",
-    "should": "must",
-    "can": "perfect",
-    "will": "action",
-    "would": "action",
-    
-    # Miscellaneous
-    "what": "explain",
-    "where": "where",
-    "when": "during",
-    "why": "explain",
-    "how": "explain",
-    "other": "other",
-    "operate": "operate",
-    "interview": "interview",
+    "ancient": "ancient",
+    "art": "art",
+    "available": "available",
+    "before": "before",
+    "body": "body",
+    "burden": "burden",
+    "car": "car",
+    "careful": "careful",
+    "clever": "clever",
+    "come": "come",
     "deafness": "deafness",
-    "deaf": "deafness",
+    "die": "die",
+    "dizzy": "dizzy",
+    "drive": "drive",
+    "during": "during",
+    "education": "education",
+    "example": "example",
+    "experience": "experience",
+    "expert": "expert",
+    "explain": "explain",
+    "finish": "finish",
+    "follow": "follow",
+    "game": "game",
+    "go": "go",
+    "government": "government",
+    "he": "he",
+    "hello": "hello",
+    "home": "home",
+    "hospital": "hospital",
+    "idle": "idle",
+    "independent": "independent",
+    "interview": "interview",
+    "january": "january",
+    "like": "like",
+    "monday": "monday",
+    "must": "must",
+    "nature": "nature",
+    "never": "never",
+    "operate": "operate",
+    "other": "other",
+    "perfect": "perfect",
+    "please": "please",
+    "politician": "politician",
+    "possible": "possible",
+    "progress": "progress",
+    "sunday": "sunday",
+    "tv": "tv",
+    "where": "where",
+    "work": "work",
+    "bad": "bad",
+    "best": "best",
+    "big": "big",
+    "call": "call",
+    "cold": "cold",
+    "yes": "yes",
+    "zero": "zero",
 }
 
 # Part-of-Speech based fallback mapping (when similarity match fails)
@@ -414,9 +275,9 @@ def _get_gloss_for_word(word: str) -> Optional[str]:
         if gloss is not None:
             return gloss
 
-    # 3. Substring match (for compound words) - skip short keys to avoid false matches (e.g. 'i')
+    # 3. Substring match (for compound words) - skip short words/keys to avoid false matches (e.g. 'i')
     for key, gloss in GLOSS_DICTIONARY.items():
-        if gloss is not None and len(key) >= 3 and (key in word_lower or word_lower in key):
+        if gloss is not None and len(key) >= 3 and len(word_lower) >= 3 and (key in word_lower or word_lower in key):
             return gloss
 
     # 4. Similarity match with HIGH threshold (0.75 minimum - very strict)
@@ -428,34 +289,18 @@ def _get_gloss_for_word(word: str) -> Optional[str]:
     return "ALPHABET_FALLBACK"
 
 
-def generate_glosses(text: str) -> List[str]:
+def generate_gloss_sequences(text: str) -> dict:
     """
-    Convert English text to a sequence of ISL glosses.
-    
-    Strategy:
-    1. Try to find gloss in dictionary or through similarity matching
-    2. If word not found, spell it out letter-by-letter using alphabet gloss (fallback)
-    3. Skip stop words (articles, prepositions, etc.)
-    
-    Args:
-        text: English sentence/phrase
-        
-    Returns:
-        List of ISL gloss words (animation names) that can be performed by the avatar.
-        For unmapped words, returns individual letter glosses (e.g., 'aditya' → ['a_sign', 'd_sign', 'i_sign', 't_sign', 'y_sign', 'a_sign'])
-        Returns empty list if input is empty or invalid.
-        
-    Example:
-        >>> generate_glosses("Hello my name is Aditya")
-        ['agree', 'he', 'he', 'a_sign', 'd_sign', 'i_sign', 't_sign', 'y_sign', 'a_sign']
+    Generate the gloss sequence for avatar animation and a parallel display sequence 
+    for UI text display. Spelled-out words map to the full uppercase word for each letter.
     """
     if not text or not text.strip():
-        return []
+        return {"glosses": [], "display": []}
 
-    # Tokenize and clean
     words = _tokenize_and_clean(text)
-    
     glosses = []
+    display = []
+
     for word in words:
         gloss = _get_gloss_for_word(word)
         
@@ -463,33 +308,37 @@ def generate_glosses(text: str) -> List[str]:
         if gloss is None:
             continue
         
-        # Check if word is in dictionary or found through similarity matching
+        # Check if the resolved gloss is available in Unity animations
         if gloss in AVAILABLE_GLOSSES:
             glosses.append(gloss)
-        # Check if we need alphabet fallback
-        elif gloss == "ALPHABET_FALLBACK":
+            display.append(word.upper())
+        else:
+            # Fall back to fingerspelling (alphabet gloss)
             alphabet_gloss = _spell_word_with_alphabet(word)
             if alphabet_gloss:
                 glosses.extend(alphabet_gloss)
-                print(f"Gloss generation: spelling out '{word}' using alphabet gloss")
+                # Display the full word (in uppercase) prefixed with 'Fingerspelled-' for the duration of its spelled-out letters
+                display.extend([f"Fingerspelled-{word.upper()}"] * len(alphabet_gloss))
+                print(f"Gloss generation: spelling out '{word}' (animation '{gloss}' not available/missing)")
             else:
                 print(f"Gloss generation: no mapping found for '{word}'")
+
+    return {"glosses": glosses, "display": display}
+
+
+def generate_glosses(text: str) -> List[str]:
+    """
+    Convert English text to a sequence of ISL glosses.
     
-    return glosses
+    Returns:
+        List of ISL gloss words (animation names) that can be performed by the avatar.
+    """
+    return generate_gloss_sequences(text)["glosses"]
 
 
 def generate_glosses_with_confidence(text: str) -> dict:
     """
     Generate glosses with confidence metadata.
-    
-    Returns:
-        {
-            "glosses": ["hello", "my", "name", ...],
-            "coverage": 0.85,  # Percentage of words successfully mapped
-            "unmapped_words": ["words_that_had_no_alphabet_match", ...],  # Words that couldn't be mapped even with alphabet
-            "fallback_words": ["aditya", ...],  # Words that used alphabet gloss fallback
-            "original_word_count": 5
-        }
     """
     if not text or not text.strip():
         return {
@@ -501,32 +350,28 @@ def generate_glosses_with_confidence(text: str) -> dict:
         }
 
     words = _tokenize_and_clean(text)
-    glosses = []
+    sequences = generate_gloss_sequences(text)
+    glosses = sequences["glosses"]
+    
     unmapped_words = []
     fallback_words = []
-
+    
+    # Identify which words were successfully mapped, fallback or unmapped
     for word in words:
         gloss = _get_gloss_for_word(word)
-        
-        # Skip stop words
         if gloss is None:
             continue
-        
-        # Word found in dictionary
         if gloss in AVAILABLE_GLOSSES:
-            glosses.append(gloss)
-        # Use alphabet fallback
-        elif gloss == "ALPHABET_FALLBACK":
+            # Directly mapped
+            pass
+        else:
             alphabet_gloss = _spell_word_with_alphabet(word)
             if alphabet_gloss:
-                glosses.extend(alphabet_gloss)
                 fallback_words.append(word)
             else:
-                # Couldn't generate alphabet gloss (no valid letters)
                 unmapped_words.append(word)
 
     word_count = len(words)
-    # Coverage: words that were either dictionary-mapped or alphabet-fallback
     mapped_count = word_count - len(unmapped_words)
     coverage = mapped_count / word_count if word_count > 0 else 0.0
 

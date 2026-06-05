@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from stt_service import transcribe_wav
 from translation_service import translate_text
-from gloss_generation_service import generate_glosses, generate_glosses_with_confidence
+from gloss_generation_service import generate_glosses, generate_glosses_with_confidence, generate_gloss_sequences
 
 app = FastAPI()
 
@@ -213,19 +213,25 @@ async def audio_endpoint(websocket: WebSocket):
 
                 # Generate ISL glosses from English translation
                 glosses = []
+                glosses_display = []
                 try:
                     if english_for_glosses:
-                        glosses = generate_glosses(english_for_glosses)
+                        sequences = generate_gloss_sequences(english_for_glosses)
+                        glosses = sequences["glosses"]
+                        glosses_display = sequences["display"]
                         print(f"Generated glosses: {glosses}")
+                        print(f"Display labels: {glosses_display}")
                 except Exception as e:
                     print(f"Error generating glosses: {e}")
                     glosses = []
+                    glosses_display = []
 
                 response = {
                     "original": transcript,
                     "translated": translated,
                     "english": english_for_glosses,  # English version for reference
                     "glosses": glosses,
+                    "glosses_display": glosses_display,
                     "src_lang": src_lang,
                     "tgt_lang": tgt_lang,
                     "timestamp": time.time(),
@@ -253,10 +259,11 @@ class GlossRequest(BaseModel):
 @app.post("/api/gloss")
 async def get_gloss(payload: GlossRequest):
     text = payload.text
-    glosses = generate_glosses(text)
+    sequences = generate_gloss_sequences(text)
     confidence_data = generate_glosses_with_confidence(text)
     return {
-        "glosses": glosses,
+        "glosses": sequences["glosses"],
+        "glosses_display": sequences["display"],
         "coverage": confidence_data["coverage"],
         "fallback_words": confidence_data["fallback_words"],
         "unmapped_words": confidence_data["unmapped_words"],
