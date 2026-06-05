@@ -414,9 +414,9 @@ def _get_gloss_for_word(word: str) -> Optional[str]:
         if gloss is not None:
             return gloss
 
-    # 3. Substring match (for compound words)
+    # 3. Substring match (for compound words) - skip short keys to avoid false matches (e.g. 'i')
     for key, gloss in GLOSS_DICTIONARY.items():
-        if gloss is not None and key and (key in word_lower or word_lower in key):
+        if gloss is not None and len(key) >= 3 and (key in word_lower or word_lower in key):
             return gloss
 
     # 4. Similarity match with HIGH threshold (0.75 minimum - very strict)

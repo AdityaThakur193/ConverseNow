@@ -9,10 +9,11 @@ import wave
 import traceback
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 
 from stt_service import transcribe_wav
 from translation_service import translate_text
-from gloss_generation_service import generate_glosses
+from gloss_generation_service import generate_glosses, generate_glosses_with_confidence
 
 app = FastAPI()
 
@@ -243,3 +244,20 @@ async def audio_endpoint(websocket: WebSocket):
             await websocket.close()
         except Exception:
             pass
+
+
+class GlossRequest(BaseModel):
+    text: str
+
+
+@app.post("/api/gloss")
+async def get_gloss(payload: GlossRequest):
+    text = payload.text
+    glosses = generate_glosses(text)
+    confidence_data = generate_glosses_with_confidence(text)
+    return {
+        "glosses": glosses,
+        "coverage": confidence_data["coverage"],
+        "fallback_words": confidence_data["fallback_words"],
+        "unmapped_words": confidence_data["unmapped_words"],
+    }

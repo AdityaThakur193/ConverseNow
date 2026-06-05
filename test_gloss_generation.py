@@ -19,7 +19,7 @@ def test_word_mapping():
     print("\n=== Testing Word Mapping ===\n")
     
     test_words = {
-        "hello": "agree",
+        "hello": "hello",
         "home": "home",
         "work": "work",
         "go": "go",
@@ -83,12 +83,12 @@ def test_gloss_generation():
     
     test_cases = [
         # Input → Expected glosses
-        # Articles, prepositions, and proper names are correctly skipped/unmapped
-        ("Hello my name is Aditya", ["agree", "he", "he", "he"]),  # "is" and "aditya" skipped
+        # Articles, prepositions, and proper names are correctly skipped/unmapped (or spelled out)
+        ("Hello my name is Aditya", ["hello", "he", "explain", "A", "D", "I", "T", "Y", "A"]),  # "is" skipped, "aditya" spelled out
         ("I like to work", ["he", "like", "work"]),  # "to" is skipped (preposition)
         ("Where is the home", ["where", "home"]),  # "is" and "the" skipped
         ("Come before finish", ["come", "before", "finish"]),
-        ("Please do this carefully", ["please", "action", "car"]),  # "this" has no good match, "carefully" → "car" via similarity
+        ("Please do this carefully", ["please", "action", "car"]),  # "this" has no good match, "carefully" → "car" via substring
         ("", []),
     ]
     
@@ -117,9 +117,9 @@ def test_confidence_metrics():
     print("\n=== Testing Confidence Metrics ===\n")
     
     test_cases = [
-        ("hello world", 0.5),  # "hello" maps, "world" doesn't (no good match)
-        ("Hello my name is Aditya", 4/5),  # 4 out of 5 words map (is, aditya unmapped)
-        ("xyz abc def", 0.0),  # No words map
+        ("hello world", 1.0),  # Both mapped (hello to dictionary, world spelled out)
+        ("Hello my name is Aditya", 1.0),  # All mapped (hello, my, name to dictionary, is skipped, aditya spelled out)
+        ("xyz abc def", 1.0),  # All spelled out via alphabet fallback
         ("", 0.0),  # Empty string
     ]
     
@@ -147,7 +147,7 @@ def test_confidence_metrics():
 
 
 def test_gloss_validity():
-    """Test that all generated glosses are valid (exist in AVAILABLE_GLOSSES)."""
+    """Test that all generated glosses are valid (exist in AVAILABLE_GLOSSES or are letter fallbacks)."""
     print("\n=== Testing Gloss Validity ===\n")
     
     test_sentences = [
@@ -162,7 +162,8 @@ def test_gloss_validity():
     
     for sentence in test_sentences:
         glosses = generate_glosses(sentence)
-        invalid = [g for g in glosses if g not in AVAILABLE_GLOSSES]
+        # Allow single-character fingerspelled letter fallbacks (A-Z)
+        invalid = [g for g in glosses if g not in AVAILABLE_GLOSSES and not (len(g) == 1 and g.isalpha() and g.isupper())]
         
         if invalid:
             print(f"✗ '{sentence}'")
@@ -185,9 +186,9 @@ def test_edge_cases():
         ("   ", []),
         ("!!!", []),
         ("123 456", []),
-        ("hello!!!", ["agree"]),
-        ("...hello...", ["agree"]),
-        ("HELLO WORLD", ["agree"]),  # Case insensitivity
+        ("hello!!!", ["hello"]),
+        ("...hello...", ["hello"]),
+        ("HELLO WORLD", ["hello", "W", "O", "R", "L", "D"]),  # Case insensitivity & spelling fallback
     ]
     
     passed = 0
