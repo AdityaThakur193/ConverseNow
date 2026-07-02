@@ -3,17 +3,17 @@ import json
 import math
 import re
 import time
+import asyncio
 from array import array
 import sys
 import wave
 import traceback
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
 
 from stt_service import transcribe_wav
 from translation_service import translate_text
-from gloss_generation_service import generate_glosses, generate_glosses_with_confidence, generate_gloss_sequences
+from gloss_generation_service import generate_glosses, generate_gloss_sequences
 
 app = FastAPI()
 
@@ -103,7 +103,7 @@ async def audio_endpoint(websocket: WebSocket):
     SAMPLE_WIDTH = 2
     NUM_CHANNELS = 1
     CHUNK_MS = 200
-    ENERGY_THRESHOLD = 1100
+    ENERGY_THRESHOLD = 400
     SILENCE_MS_TO_END = 800
     MIN_SPEECH_MS = 800
     MAX_UTTERANCE_MS = 6000
@@ -147,6 +147,9 @@ async def audio_endpoint(websocket: WebSocket):
             except Exception:
                 rms = 0
 
+            # NEW: Print the volume to the terminal so you can see if the mic is working!
+            print(f"🎙️ Volume: {rms} | Speech Started: {speech_started}")
+
             if rms > ENERGY_THRESHOLD:
                 speech_started = True
                 speech_ms += CHUNK_MS
@@ -175,7 +178,13 @@ async def audio_endpoint(websocket: WebSocket):
                     sample_width=SAMPLE_WIDTH,
                 )
 
-                transcript = transcribe_wav(wav_bytes, src_lang=src_lang)
+                # Run blocking operations in thread pool to prevent blocking the async loop
+                # This allows the websocket to receive disconnect messages during transcription
+                try:
+                    transcript = await asyncio.to_thread(transcribe_wav, wav_bytes, src_lang)
+                except Exception as e:
+                    print(f"Transcription failed: {e}")
+                    transcript = None
 
                 audio_buffer = bytearray()
                 speech_started = False
@@ -197,30 +206,33 @@ async def audio_endpoint(websocket: WebSocket):
 
                 last_final_transcript = transcript
 
-                # Translate to target language
-                translated = translate_text(
-                    transcript,
-                    src_lang=src_lang,
-                    tgt_lang=tgt_lang
-                ) or transcript
+                # Run translations in thread pool as well
+                try:
+                    translated = await asyncio.to_thread(
+                        translate_text, transcript, src_lang, tgt_lang
+                    ) or transcript
+                except Exception as e:
+                    print(f"Translation failed: {e}")
+                    translated = transcript
 
                 # Also translate to English for gloss generation
-                english_for_glosses = translate_text(
-                    transcript,
-                    src_lang=src_lang,
-                    tgt_lang="en-IN"
-                ) or ""
+                try:
+                    english_for_glosses = await asyncio.to_thread(
+                        translate_text, transcript, src_lang, "en-IN"
+                    ) or ""
+                except Exception as e:
+                    print(f"English translation for glosses failed: {e}")
+                    english_for_glosses = ""
 
-                # Generate ISL glosses from English translation
+                # Generate ISL glosses and display labels from English translation
                 glosses = []
                 glosses_display = []
                 try:
                     if english_for_glosses:
-                        sequences = generate_gloss_sequences(english_for_glosses)
-                        glosses = sequences["glosses"]
-                        glosses_display = sequences["display"]
-                        print(f"Generated glosses: {glosses}")
-                        print(f"Display labels: {glosses_display}")
+                        seq = await asyncio.to_thread(generate_gloss_sequences, english_for_glosses)
+                        glosses = seq.get("glosses", [])
+                        glosses_display = seq.get("display", [])
+                        print(f"Generated glosses: {glosses}, display: {glosses_display}")
                 except Exception as e:
                     print(f"Error generating glosses: {e}")
                     glosses = []
@@ -229,7 +241,7 @@ async def audio_endpoint(websocket: WebSocket):
                 response = {
                     "original": transcript,
                     "translated": translated,
-                    "english": english_for_glosses,  # English version for reference
+                    "english": english_for_glosses,
                     "glosses": glosses,
                     "glosses_display": glosses_display,
                     "src_lang": src_lang,
@@ -238,11 +250,26 @@ async def audio_endpoint(websocket: WebSocket):
                     "final": True,
                 }
 
-                await websocket.send_json(response)
-                print("Sent final transcript + translation + glosses")
+                # Send response with proper error handling for closed connections
+                try:
+                    await websocket.send_json(response)
+                    print("Sent final transcript + translation + glosses")
+                except (RuntimeError, ConnectionError) as e:
+                    # Connection was closed, likely by Unity
+                    print(f"Failed to send response (connection closed): {e}")
+                    break
+                except Exception as e:
+                    print(f"Error sending response: {e}")
+                    break
 
     except WebSocketDisconnect:
-        print("Client disconnected")
+        print("Client disconnected gracefully")
+    except RuntimeError as e:
+        if "websocket.closed" in str(e).lower() or "closed" in str(e).lower():
+            print("WebSocket connection was closed")
+        else:
+            print(f"Runtime error in websocket handler: {e}")
+            traceback.print_exc()
     except Exception as e:
         print("Error in websocket handler:", e)
         traceback.print_exc()
@@ -250,21 +277,3 @@ async def audio_endpoint(websocket: WebSocket):
             await websocket.close()
         except Exception:
             pass
-
-
-class GlossRequest(BaseModel):
-    text: str
-
-
-@app.post("/api/gloss")
-async def get_gloss(payload: GlossRequest):
-    text = payload.text
-    sequences = generate_gloss_sequences(text)
-    confidence_data = generate_glosses_with_confidence(text)
-    return {
-        "glosses": sequences["glosses"],
-        "glosses_display": sequences["display"],
-        "coverage": confidence_data["coverage"],
-        "fallback_words": confidence_data["fallback_words"],
-        "unmapped_words": confidence_data["unmapped_words"],
-    }

@@ -19,9 +19,7 @@ AVAILABLE_GLOSSES = {
     "nature", "never", "operate", "other", "perfect", "please", "politician",
     "possible", "progress", "sunday", "tv", "where", "work",
     # Extra word animations from ISL_WE folder
-    "bad", "best", "big", "call", "cold", "yes", "zero",
-    # Letter animations (available)
-    "C", "I", "L", "U"
+    "bad", "best", "big", "call", "cold", "yes","you","what", "zero"
 }
 
 # English word → ISL gloss mapping dictionary
@@ -105,7 +103,10 @@ GLOSS_DICTIONARY = {
     "government": "government",
     "he": "he",
     "hello": "hello",
+    "hi": "hello",
+    "hey": "hello",
     "home": "home",
+    "house": "home",
     "hospital": "hospital",
     "idle": "idle",
     "independent": "independent",
@@ -126,6 +127,7 @@ GLOSS_DICTIONARY = {
     "sunday": "sunday",
     "tv": "tv",
     "where": "where",
+    "what": "what",
     "work": "work",
     "bad": "bad",
     "best": "best",
@@ -133,6 +135,7 @@ GLOSS_DICTIONARY = {
     "call": "call",
     "cold": "cold",
     "yes": "yes",
+    "you": "you",
     "zero": "zero",
 }
 
