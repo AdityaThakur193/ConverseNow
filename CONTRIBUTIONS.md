@@ -25,19 +25,24 @@ This document outlines the division of work and specific contributions of each t
 
 ---
 
-## 3. Jaahnavi Neelam (Humanoid Rigging, Playback Systems & MR Research)
-* **Research & Evaluation**: Conducted a comprehensive survey of Indian Sign Language avatar literature, motion capture technologies, and Unity rigging workflows.
-* **Humanoid Rigging & Playback**: Integrated the humanoid avatar and configured playback controllers to read and loop recorded `.anim` files dynamically.
-* **Synchronization & Debugging**: Tested and resolved rotation anomalies, hand/finger orientations, and synchronization lags in the avatar animation playback.
-* **Mixed Reality (MR) Scoping**: Evaluated Unity MR packages (XR Interaction Toolkit) and designed implementation blueprints for future headset-based deployments.
+## 3. Jaahnavi Neelam (Humanoid Rigging, Playback Systems & Motion Capture)
+* **Research & Evaluation**: Conducted a comprehensive study of Indian Sign Language avatar systems, motion capture technologies, and Unity humanoid rigging workflows.
+* **MediaPipe Feasibility Analysis**: Extracted body and hand coordinates using MediaPipe and evaluated the feasibility of using landmark coordinates to drive avatar movement in Unity.
+* **Motion Capture & FBX Generation**: Converted recorded sign language videos into FBX motion data using DeepMotion and QuickMagic for animation integration.
+* **Humanoid Rigging & Animation Playback**: Integrated the humanoid avatar in Unity, configured humanoid rigging and animation controllers, and implemented playback of recorded `.anim` files.
+* **Testing & Debugging**: Tested and resolved issues related to avatar movement, bone rotations, hand and finger orientations, and animation synchronization to improve playback accuracy and overall performance.
 
 ---
 
-## 4. Sophie (MediaPipe Integration, Animation Mapping & Data Pipelines)
-* **MediaPipe Coordinate Animation**: Developed and verified Unity humanoid animation scripts driven by tracking coordinate data from Google MediaPipe.
-* **Video-Driven Translation**: Structured video-driven animation pipelines, integrating MP4 feed mapping with MediaPipe to drive real-time joint rotations in Unity.
-* **Joint & Finger Mapping**: Programmed joint angles and finger coordinate scaling formulas to translate landmarks into humanoid bone transforms.
-* **Data Input Evaluation**: Researched and benchmarked different data storage formats (CSV, JSON, MP4) to identify the most robust pipeline for motion capture mapping.
+## 4. Sophie (Animation Pipelines & Humanoid Rigging)
+* **Research & Selection**: Researched ISL datasets and selected video samples for testing and validation.
+* **Animation Pipeline Development**: Developed the `MP4 -> FBX -> .anim -> Unity` pipeline to convert ISL videos into 3D avatar animations.
+* **Animation Refinement**: Refined animation files in Blender and XR Animator for smooth, accurate motion.
+* **Humanoid Avatar Configuration**: Rigged and configured humanoid avatars in Unity, including manual bone mapping for gesture accuracy.
+* **Frame-by-Frame Editing**: Edited hand and finger animations frame-by-frame in Blender to improve natural movement.
+* **Motion Retargeting**: Retargeted ISL video movements onto 3D avatars using tracking points.
+* **Pose Tracking Tests**: Tested `MediaPipeUnityPlugin` for MP4-based pose tracking and avatar mapping.
+* **Import Issue Resolution**: Resolved import issues with `.glb`, `.gltf`, `.fbx`, and `.anim` formats.
 
 ---
 
