@@ -65,13 +65,14 @@ Wraps the SarvamAI REST client API using the `sarvam-translate:v1` model.
 
 ### 4. 👐 Sign Language Gloss Generator: `gloss_generation_service.py`
 Translates English text into sequences of Indian Sign Language (ISL) glosses. The glosses match a predefined dictionary of available avatar animations inside Unity.
-* **Available Glosses (`AVAILABLE_GLOSSES`)**: A dictionary representing 52 core animations (e.g., `"hello"`, `"hospital"`, `"monday"`, `"work"`) and alphabet characters (`"C"`, `"I"`, `"L"`, `"U"`).
-* **Stop Word Elimination**: Filters out grammatical syntax that does not carry semantic weight in sign language (e.g., `"is"`, `"the"`, `"to"`, `"and"`).
+* **Available Glosses (`AVAILABLE_GLOSSES`)**: A dictionary representing 56 core animations (e.g., `"hello"`, `"hospital"`, `"my_name_is"`, `"what_happend"`, `"yesterday"`) and alphabet characters.
+* **Stop Word Omission**: Filters out grammatical syntax that does not carry semantic weight in sign language (e.g., `"is"`, `"the"`, `"to"`, `"and"`).
 * **Cascade Mapping Heuristics**:
-  1. **Exact Dictionary Match**: Translates words directly if they are registered.
-  2. **Substring Mapping**: Matches parts of compound words (e.g., `"goodbye"` matching `"bye"`).
-  3. **Similarity Fallback**: Uses `difflib.SequenceMatcher` with a strict score threshold of `0.75` to map similar terms.
-  4. **Fingerspelling Fallback**: If no semantic animation is found, the word is spelled out character-by-character using alphabet animations (e.g., `"Aditya"` -> `["A", "D", "I", "T", "Y", "A"]`).
+  1. **Phrase Preprocessing**: Converts common phrases (like `"my name is"`, `"what is your name"`, `"what happened"`, `"yesterday"`) into compound animation tokens (e.g., `"my_name_is"`, `"what_happend"`, `"yesturday"`) before tokenization, preventing them from being filtered by stop-word rules.
+  2. **Exact Dictionary Match**: Translates words directly if they are registered.
+  3. **Substring Mapping**: Matches parts of compound words (e.g., `"goodbye"` matching `"bye"`).
+  4. **Similarity Fallback**: Uses `difflib.SequenceMatcher` with a strict score threshold of `0.75` to map similar terms.
+  5. **Fingerspelling Fallback**: If no semantic animation is found, the word is spelled out character-by-character using alphabet animations (e.g., `"Aditya"` -> `["A", "D", "I", "T", "Y", "A"]`).
 * **Confidence Metrics**: Calculates the percentage of words mapped directly (coverage) versus words that fell back to spelling or remained unmapped.
 
 ---

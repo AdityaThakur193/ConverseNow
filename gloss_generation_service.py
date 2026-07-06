@@ -19,7 +19,9 @@ AVAILABLE_GLOSSES = {
     "nature", "never", "operate", "other", "perfect", "please", "politician",
     "possible", "progress", "sunday", "tv", "where", "work",
     # Extra word animations from ISL_WE folder
-    "bad", "best", "big", "call", "cold", "yes","you","what", "zero"
+    "bad", "best", "big", "call", "cold", "yes","you","what", "zero",
+    # New phrase and word animations added
+    "my_name_is", "what_happend", "what_is_your_name", "yesturday"
 }
 
 # English word → ISL gloss mapping dictionary
@@ -137,6 +139,12 @@ GLOSS_DICTIONARY = {
     "yes": "yes",
     "you": "you",
     "zero": "zero",
+    # New phrase and word mappings
+    "my_name_is": "my_name_is",
+    "what_happend": "what_happend",
+    "what_is_your_name": "what_is_your_name",
+    "yesturday": "yesturday",
+    "yesterday": "yesturday",
 }
 
 # Part-of-Speech based fallback mapping (when similarity match fails)
@@ -239,14 +247,29 @@ def _tokenize_and_clean(text: str) -> List[str]:
     if not text or not text.strip():
         return []
 
+    # Convert to lowercase and normalize whitespace first
+    text_processed = text.lower().strip()
     # Remove punctuation but keep spaces
-    text = re.sub(r"[^\w\s]", " ", text)
-    
+    text_processed = re.sub(r"[^\w\s]", " ", text_processed)
+    # Normalize multiple spaces into single spaces
+    text_processed = " ".join(text_processed.split())
+
+    # Replace multi-word phrase patterns with compound animation tokens
+    phrases = {
+        "my name is": "my_name_is",
+        "what is your name": "what_is_your_name",
+        "what s your name": "what_is_your_name",
+        "what happened": "what_happend",
+        "what happend": "what_happend",
+        "yesterday": "yesturday",
+    }
+    for phrase, replacement in phrases.items():
+        text_processed = re.sub(r'\b' + phrase + r'\b', replacement, text_processed)
+
     # Split on whitespace
-    words = text.split()
+    words = text_processed.split()
     
-    # Convert to lowercase and filter empty strings
-    return [word.lower() for word in words if word.strip()]
+    return [word for word in words if word.strip()]
 
 
 def _get_gloss_for_word(word: str) -> Optional[str]:

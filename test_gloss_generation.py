@@ -53,7 +53,7 @@ def test_tokenization():
     
     test_cases = {
         "Hello world!": ["hello", "world"],
-        "What's your name?": ["what", "s", "your", "name"],
+        "What's your name?": ["what_is_your_name"],
         "I like to work and play!": ["i", "like", "to", "work", "and", "play"],
         "": [],
         "   ": [],
@@ -84,7 +84,7 @@ def test_gloss_generation():
     test_cases = [
         # Input → Expected glosses
         # Articles, prepositions, and proper names are correctly skipped/unmapped (or spelled out)
-        ("Hello my name is Aditya", ["hello", "M", "Y", "N", "A", "M", "E", "A", "D", "I", "T", "Y", "A"]),  # "is" skipped, others spelled out
+        ("Hello my name is Aditya", ["hello", "my_name_is", "A", "D", "I", "T", "Y", "A"]),  # "my name is" mapped to compound, aditya spelled out
         ("I like to work", ["I", "like", "work"]),  # "to" is skipped (preposition)
         ("Where is the home", ["where", "home"]),  # "is" and "the" skipped
         ("Come before finish", ["come", "before", "finish"]),

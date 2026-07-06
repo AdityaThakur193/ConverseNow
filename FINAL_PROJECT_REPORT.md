@@ -51,7 +51,8 @@ By employing local Speech-to-Text inference and a robust cascade mapping diction
 * **FR-3: Multilingual Transcription & Validation**: The server must transcribe speech in English and 10 regional Indian scripts using local Whisper inference and reject noise/ASCII transcripts when an Indic regional script was expected.
 * **FR-4: API-Based Text Translation**: The server must translate the finalized transcription into the target language requested by the client (for subtitles) and English (for gloss mapping).
 * **FR-5: Cascade Gloss Translation**: The system must map English text into a sequence of ISL glosses using a cascading match checklist:
-  * Omit grammatical stop words (e.g., `"is"`, `"to"`, `"the"`).
+  * Preprocess common phrases (like `"my name is"`, `"what is your name"`, `"what happened"`) into unified tokens before tokenizing to bypass stop words.
+  * Omit grammatical stop words (e.g., `"is"`, `"the"`, `"to"`).
   * Match exact dictionary terms.
   * Match sub-words/substrings (length $\ge$ 3).
   * Match similar terms (similarity score $\ge$ 0.75).
@@ -180,10 +181,11 @@ classDiagram
 * Resolves the English translation into a list of animation names.
 * **Stop Word Omission**: Removes words like `"is"`, `"the"`, `"to"` which carry no semantic weight in sign language.
 * **Cascading Logic**:
-  1. *Exact match* in local dictionary.
-  2. *Substring match* (restricted to keys $\ge$ 3 characters).
-  3. *Similarity mapping* (using `difflib.SequenceMatcher` with a strict threshold $\ge$ 0.75).
-  4. *Fingerspelling fallback*: Spells out unrecognized words character-by-character.
+  1. *Phrase Preprocessing*: Maps common phrases (like `"my name is"`, `"what is your name"`, `"what happened"`, `"yesterday"`) to compound tokens before parsing.
+  2. *Exact match* in local dictionary.
+  3. *Substring match* (restricted to keys $\ge$ 3 characters).
+  4. *Similarity mapping* (using `difflib.SequenceMatcher` with a strict threshold $\ge$ 0.75).
+  5. *Fingerspelling fallback*: Spells out unrecognized words character-by-character.
 
 ---
 
