@@ -6,6 +6,8 @@ Tests the enhanced model with better decoding parameters and validation.
 
 import os
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from stt_service import transcribe_wav, _validate_indic_text, _get_decode_options
 
 def test_validation():

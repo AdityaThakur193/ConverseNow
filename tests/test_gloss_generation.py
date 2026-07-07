@@ -5,6 +5,10 @@ Test suite for ISL Gloss Generation Service
 Tests word mapping, gloss generation, and edge cases.
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from gloss_generation_service import (
     generate_glosses,
     generate_glosses_with_confidence,
